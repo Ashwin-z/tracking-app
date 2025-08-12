@@ -1,0 +1,20 @@
+@'
+node_modules
+.expo
+.expo-shared
+dist
+build
+android/app/build
+android/build
+ios/build
+*.keystore
+*.jks
+'@ | Out-File -Encoding utf8 .gitignore
+
+
+# (Optional but speeds up EAS if you add extra patterns)
+@'
+# EAS-only ignore (used in addition to .gitignore)
+**/*.keystore
+**/*.jks
+'@ | Out-File -Encoding utf8 .easignore
