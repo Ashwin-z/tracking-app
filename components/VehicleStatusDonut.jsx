@@ -9,7 +9,7 @@ const VehicleStatusDonut = ({
   total = 0,
   trackColor = '#E5E7EB',
   centerFill = '#CBD5E1',
-  segmentGapDeg = 0.5,   // very small gap
+  segmentGapDeg = 0.6, // tiny, prevents visual breaks
 }) => {
   const radius = size / 2 - strokeWidth / 2;
   const cx = size / 2;
@@ -26,8 +26,16 @@ const VehicleStatusDonut = ({
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size}>
         <G origin={`${cx}, ${cy}`}>
-          {/* Background track */}
-          <Circle cx={cx} cy={cy} r={radius} stroke={trackColor} strokeWidth={strokeWidth} opacity={0.35} />
+          {/* background track */}
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={radius}
+            stroke={trackColor}
+            strokeWidth={strokeWidth}
+            opacity={0.35}
+            fill="none"
+          />
           {data.map((d, i) => {
             const sweep = (d.value / sum) * usableDegrees;
             const dash = (sweep / 360) * circumference;
@@ -42,7 +50,7 @@ const VehicleStatusDonut = ({
                 stroke={d.color}
                 strokeWidth={strokeWidth}
                 strokeDasharray={`${dash} ${gap}`}
-                strokeLinecap="round"  // smoother joins, no “broken” edges
+                strokeLinecap="round"
                 fill="none"
                 rotation={startAngle}
                 origin={`${cx}, ${cy}`}
@@ -54,7 +62,7 @@ const VehicleStatusDonut = ({
         </G>
       </Svg>
 
-      {/* Center disc + number */}
+      {/* center disc */}
       <View
         style={[
           styles.centerFill,
@@ -68,6 +76,7 @@ const VehicleStatusDonut = ({
       />
       <View style={styles.center}>
         <Text style={styles.total}>{total}</Text>
+        <Text style={styles.caption}>vehicles</Text>
       </View>
     </View>
   );
@@ -76,7 +85,8 @@ const VehicleStatusDonut = ({
 const styles = StyleSheet.create({
   center: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   centerFill: { position: 'absolute' },
-  total: { fontSize: 30, fontWeight: '900', color: '#111827' },
+  total: { fontSize: 30, fontWeight: '900', color: '#111827', lineHeight: 32 },
+  caption: { marginTop: 2, fontSize: 11, color: '#334155', fontWeight: '700' },
 });
 
 export default VehicleStatusDonut;

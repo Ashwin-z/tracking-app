@@ -6,11 +6,11 @@ const AlertTile = ({ label, count, icon, color, borderColor, onPress = () => {} 
   return (
     <Pressable
       onPress={onPress}
-      android_ripple={{ color: (color || '#e5e7eb') + '44', radius: 120 }}
+      android_ripple={{ color: (color || '#e5e7eb') + '44', radius: 140 }}
       style={({ pressed }) => [
         styles.tile,
         { borderColor: borderColor || color },
-        pressed && Platform.OS === 'ios' ? { opacity: 0.92 } : null,
+        pressed && Platform.OS === 'ios' ? { opacity: 0.94 } : null,
       ]}
     >
       <View style={[styles.iconWrap, { backgroundColor: (color || '#000') + '18' }]}>
@@ -31,14 +31,14 @@ const AlertTile = ({ label, count, icon, color, borderColor, onPress = () => {} 
 const styles = StyleSheet.create({
   tile: {
     width: '48%',
-    minHeight: 100,
+    minHeight: 104,
     borderRadius: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     marginBottom: 12,
     borderWidth: 1.6,
     backgroundColor: '#F8FAFC',
-    alignItems: 'center', // center icon + text
+    alignItems: 'center',
     justifyContent: 'flex-start',
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -53,24 +53,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   label: {
     textAlign: 'center',
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 13.5,
+    lineHeight: 16.5,
     color: '#0F172A',
     fontWeight: '700',
-    marginBottom: 8,
-    paddingHorizontal: 4,
+    marginBottom: 4,
+    paddingHorizontal: 2,
   },
   badge: {
     position: 'absolute',
     top: 8,
     right: 8,
     borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
   },
   badgeText: { color: '#fff', fontWeight: '800', fontSize: 12 },
 });

@@ -26,7 +26,8 @@
     "expo-haptics": "~14.1.4",
     "react-native-maps": "1.20.1",
     "expo-location": "~18.1.6",
-    "expo-dev-client": "~5.2.4"
+    "expo-dev-client": "~5.2.4",
+    "@react-native-async-storage/async-storage": "2.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

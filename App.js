@@ -10,12 +10,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/Login';
 import DashboardScreen from './screens/DashboardScreen';
-import MapScreen from './screens/Map'; // ✅ use your real Map screen
+import MapScreen from './screens/Map';
+import StatusScreen from './screens/Status';
+import SettingsScreen from './screens/Setting';
+import AlertsScreen from './screens/Alerts';
+import ContactScreen from './screens/Contact';
 
-const AlertsScreen = () => null;
-const SettingsScreen = () => null;
-const CallScreen = () => null;
-const StatusScreen = () => null;
+import { AuthProvider } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,51 +38,37 @@ function MainTabs() {
           backgroundColor: '#fff',
           borderTopWidth: 0,
           elevation: 10,
-          overflow: 'visible',      // let long labels spill horizontally
+          overflow: 'visible',
         },
-        tabBarItemStyle: {
-          overflow: 'visible',      // allow each item to let children overflow
-        },
+        tabBarItemStyle: { overflow: 'visible' },
         tabBarLabel: () => null,
         tabBarIcon: ({ focused, color }) => {
           const icons = {
             Dashboard: 'speedometer-outline',
+            Status: 'information-circle-outline',
             Map: 'map-outline',
             Alerts: 'notifications-outline',
             Settings: 'settings-outline',
-            Call: 'call-outline',
-            Status: 'information-circle-outline',
+            Contact: 'call-outline',
           };
-
           return (
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                height: 30,          // keeps icon anchoring stable
-                width: '100%',
-              }}
-            >
+            <View style={{ alignItems: 'center', justifyContent: 'flex-start', height: 30, width: '100%' }}>
               <Ionicons name={icons[route.name]} size={30} color={color} />
-
-              {/* Label: always rendered (no layout shift), single line, wide width so it can overflow horizontally */}
               <Text
                 style={{
                   position: 'absolute',
                   top: 40,
-                                 // sits under icon
                   color,
                   fontSize: 10,
                   fontWeight: '600',
-                  opacity: focused ? 1 : 0, // invisible when inactive, but space reserved
-                  width: 160,              // wide so long names spill into neighbors
+                  opacity: focused ? 1 : 0,
+                  width: 160,
                   textAlign: 'center',
-                  marginLeft: 2,
-                  includeFontPadding: false, // Android: tighter vertical box
+                  includeFontPadding: false,
                   zIndex: 1,
                 }}
                 numberOfLines={1}
-                ellipsizeMode="clip"        // no ellipsis; allow visual overflow horizontally
+                ellipsizeMode="clip"
                 pointerEvents="none"
               >
                 {route.name}
@@ -97,7 +84,7 @@ function MainTabs() {
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Alerts" component={AlertsScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
-      <Tab.Screen name="Call" component={CallScreen} />
+      <Tab.Screen name="Contact" component={ContactScreen} />
     </Tab.Navigator>
   );
 }
@@ -109,12 +96,14 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer theme={theme}>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="MainTabs" component={MainTabs} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer theme={theme}>
+        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
   );
 }

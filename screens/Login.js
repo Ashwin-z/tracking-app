@@ -1,32 +1,22 @@
+// screens/Login.js
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Animated,
-  StatusBar,
-  Alert,
-  ScrollView,
-  SafeAreaView,
-  Keyboard,
-  Platform,
-  findNodeHandle,
-  UIManager,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
+  Animated, StatusBar, Alert, ScrollView, SafeAreaView, Keyboard,
+  Platform, findNodeHandle, UIManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';                  // ✅ NEW
 
 const { width, height } = Dimensions.get('window');
-
-// Replace with your machine's local IP address (dev) or host (prod)
-const BASE_URL = __DEV__ ? 'http://192.168.100.8:3000' : 'https://your-prod-host.com';
+import { BASE_URL } from '../config';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
+  const { signIn } = useAuth();                                    // ✅ NEW
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -37,13 +27,11 @@ const LoginScreen = () => {
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
 
-  // ✅ Persist animation values across renders
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Entry animation
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 800, useNativeDriver: true }),
@@ -57,7 +45,6 @@ const LoginScreen = () => {
     );
     loop.start();
 
-    // Keyboard listeners
     const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
       if (scrollViewRef.current && focusedField) {
         let inputHandle;
@@ -73,22 +60,15 @@ const LoginScreen = () => {
         }
       }
     });
-
     const hideSub = Keyboard.addListener('keyboardDidHide', () => {
       if (scrollViewRef.current) scrollViewRef.current.scrollTo({ y: 0, animated: true });
     });
 
-    return () => {
-      loop.stop();
-      showSub.remove();
-      hideSub.remove();
-    };
+    return () => { loop.stop(); showSub.remove(); hideSub.remove(); };
   }, [focusedField, fadeAnim, slideAnim, pulseAnim]);
 
   const handleInputFocus = (field) => setFocusedField(field);
-
-  const handleInputChange = (field, value) =>
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleInputChange = (field, value) => setFormData((p) => ({ ...p, [field]: value }));
 
   const handleLogin = async () => {
     if (!formData.email || !formData.password) {
@@ -99,7 +79,7 @@ const LoginScreen = () => {
     setIsLoading(true);
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
@@ -107,38 +87,28 @@ const LoginScreen = () => {
         body: JSON.stringify(formData),
         signal: controller.signal,
       });
-
       clearTimeout(timeoutId);
+
       const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Login failed');
 
-      if (response.ok) {
-        // Optional: toast first. If you keep Alert, redirect in the onPress.
-        Alert.alert('Success!', data.message || 'Logged in successfully', [
-          {
-            text: 'OK',
-            onPress: () => {
-              setIsLoading(false);
-              // ✅ Enter the tab navigator and clear auth screens from history
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'MainTabs' }], // Dashboard is the default tab inside MainTabs
-              });
+      // ✅ Save the user globally so Settings can read it
+      const user = { name: data.userName, email: data.email || formData.email };
+      await signIn(user);
+      // also keep a simple fallback key if you want
+      await AsyncStorage.setItem('user_email', user.email);
 
-              // If you want to pass the user name to Dashboard:
-              // navigation.navigate('MainTabs', { screen: 'Dashboard', params: { userName: data?.userName } });
-            },
+      Alert.alert('Success!', data.message || 'Logged in successfully', [
+        {
+          text: 'OK',
+          onPress: () => {
+            setIsLoading(false);
+            navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
           },
-        ]);
-      } else {
-        Alert.alert('Error', data.message || 'Login failed');
-        setIsLoading(false);
-      }
+        },
+      ]);
     } catch (err) {
-      const errorMessage =
-        err?.name === 'AbortError'
-          ? 'Request timed out. Please try again.'
-          : 'Failed to connect to server. Please check your network or server.';
-      Alert.alert('Error', errorMessage);
+      Alert.alert('Error', err.message === 'AbortError' ? 'Request timed out. Please try again.' : err.message);
       setIsLoading(false);
     }
   };
